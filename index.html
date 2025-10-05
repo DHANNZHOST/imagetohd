@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HD Image Upscaler - API Fixed</title>
+    <title>HD Image Upscaler - Base64 Version</title>
     <style>
         * {
             margin: 0;
@@ -241,19 +241,50 @@
             margin: 20px 0;
             display: none;
         }
+        
+        .method-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .method-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4ecdc4;
+            color: #4ecdc4;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .method-btn.active {
+            background: #4ecdc4;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🖼️ HD Image Upscaler - API Fixed</h1>
+            <h1>🖼️ HD Image Upscaler - Base64</h1>
             <p style="color: #a5b1c2; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
-                Menggunakan API real dengan implementasi yang benar
+                Menggunakan base64 untuk proses yang lebih cepat dan reliable
             </p>
         </header>
 
+        <div class="method-selector">
+            <button class="method-btn active" id="base64Btn" onclick="setMethod('base64')">
+                🔄 Base64 Method
+            </button>
+            <button class="method-btn" id="urlBtn" onclick="setMethod('url')">
+                🌐 URL Method
+            </button>
+        </div>
+
         <div class="api-status" id="apiStatus">
-            ✅ API siap digunakan
+            ✅ Base64 method siap digunakan
         </div>
         
         <div class="upload-area" id="uploadArea">
@@ -330,13 +361,59 @@
     </div>
 
     <script>
-        // API Configuration - Sama seperti di bot
+        // API Configuration
         const API_URL = 'https://api.siputzx.my.id/api/iloveimg/upscale';
-        
+        let currentMethod = 'base64';
         let originalFile = null;
         let originalImage = null;
 
-        // Fix untuk upload ke tmpfiles.org
+        function setMethod(method) {
+            currentMethod = method;
+            document.getElementById('base64Btn').classList.toggle('active', method === 'base64');
+            document.getElementById('urlBtn').classList.toggle('active', method === 'url');
+            document.getElementById('apiStatus').textContent = 
+                method === 'base64' ? '✅ Base64 method siap digunakan' : '✅ URL method siap digunakan';
+        }
+
+        // Base64 method - langsung kirim base64 ke API
+        async function upscaleWithBase64(base64Data) {
+            try {
+                // Bersihkan base64 dari data URL prefix
+                const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+                
+                const upscaleUrl = `${API_URL}?image=${encodeURIComponent(cleanBase64)}&scale=4`;
+                
+                console.log('Base64 Request URL:', upscaleUrl.substring(0, 100) + '...');
+                
+                const response = await fetch(upscaleUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'image/*',
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('Response Status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                console.log('Blob received:', blob.size, 'bytes');
+                
+                if (blob.size === 0) {
+                    throw new Error('Response kosong dari API');
+                }
+                
+                return URL.createObjectURL(blob);
+            } catch (error) {
+                console.error('Base64 API Error:', error);
+                throw error;
+            }
+        }
+
+        // URL method - upload ke tmpfiles dulu
         async function uploadToTmpFiles(file) {
             const formData = new FormData();
             formData.append('file', file);
@@ -355,9 +432,8 @@
                 console.log('TmpFiles Response:', data);
                 
                 if (data.data && data.data.url) {
-                    // Extract file ID dari URL
                     const url = data.data.url;
-                    const fileId = url.split('/').slice(-2, -1)[0]; // Ambil ID dari URL
+                    const fileId = url.split('/').slice(-2, -1)[0];
                     const fileName = file.name || 'image.jpg';
                     
                     return `https://tmpfiles.org/dl/${fileId}/${fileName}`;
@@ -369,14 +445,12 @@
             }
         }
 
-        // Fix untuk API upscale
-        async function upscaleWithAPI(imageUrl) {
+        async function upscaleWithURL(imageUrl) {
             try {
-                // Encode URL dengan benar
                 const encodedUrl = encodeURIComponent(imageUrl);
                 const upscaleUrl = `${API_URL}?image=${encodedUrl}&scale=4`;
                 
-                console.log('Request URL:', upscaleUrl);
+                console.log('URL Request:', upscaleUrl);
                 
                 const response = await fetch(upscaleUrl, {
                     method: 'GET',
@@ -387,24 +461,17 @@
                 });
                 
                 console.log('Response Status:', response.status);
-                console.log('Response Headers:', response.headers);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('API Error Response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const blob = await response.blob();
                 console.log('Blob received:', blob.size, 'bytes');
                 
-                if (blob.size === 0) {
-                    throw new Error('Response kosong dari API');
-                }
-                
                 return URL.createObjectURL(blob);
             } catch (error) {
-                console.error('API Error:', error);
+                console.error('URL API Error:', error);
                 throw error;
             }
         }
@@ -415,8 +482,8 @@
                 return;
             }
 
-            if (file.size > 10 * 1024 * 1024) {
-                showError('Ukuran file terlalu besar. Maksimal 10MB.');
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit untuk base64
+                showError('Ukuran file terlalu besar. Maksimal 5MB untuk base64 method.');
                 return;
             }
 
@@ -432,64 +499,90 @@
                         `${originalImage.width} × ${originalImage.height} | ${(file.size/1024).toFixed(1)} KB`;
                     
                     document.getElementById('uploadArea').style.display = 'none';
-                    processWithAPI(file);
+                    
+                    if (currentMethod === 'base64') {
+                        processWithBase64(e.target.result, file.size);
+                    } else {
+                        processWithURL(file);
+                    }
                 };
                 originalImage.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        async function processWithAPI(file) {
+        async function processWithBase64(base64Data, fileSize) {
+            const startTime = Date.now();
+            
+            try {
+                showLoading('Memproses dengan base64...', 'Mengirim data langsung ke API');
+                
+                const hdImageUrl = await upscaleWithBase64(base64Data);
+                
+                const endTime = Date.now();
+                const processTime = ((endTime - startTime) / 1000).toFixed(2);
+                
+                displayResult(hdImageUrl, fileSize, processTime);
+                
+            } catch (error) {
+                hideLoading();
+                showError(`Base64 method gagal: ${error.message}`);
+                console.error('Base64 process error:', error);
+                resetApp();
+            }
+        }
+
+        async function processWithURL(file) {
             const startTime = Date.now();
             
             try {
                 showLoading('Mengunggah gambar ke server...', 'Tahap 1: Upload ke tmpfiles.org');
                 
-                // Step 1: Upload ke tmpfiles.org
                 const tmpFilesLink = await uploadToTmpFiles(file);
                 console.log('File uploaded to:', tmpFilesLink);
                 
-                // Step 2: Upscale dengan API
                 updateLoading('Memproses dengan AI...', 'Tahap 2: Meningkatkan kualitas 4x');
-                const hdImageUrl = await upscaleWithAPI(tmpFilesLink);
-                
-                // Step 3: Tampilkan hasil
-                updateLoading('Menyiapkan hasil...', 'Tahap 3: Finalisasi gambar');
+                const hdImageUrl = await upscaleWithURL(tmpFilesLink);
                 
                 const endTime = Date.now();
                 const processTime = ((endTime - startTime) / 1000).toFixed(2);
                 
-                // Load HD image
-                const hdImage = new Image();
-                hdImage.onload = function() {
-                    document.getElementById('resultPreview').src = hdImageUrl;
-                    document.getElementById('resultInfo').textContent = 
-                        `${hdImage.width} × ${hdImage.height} | ${(file.size * 2 / 1024).toFixed(1)} KB`;
-                    
-                    // Update stats
-                    document.getElementById('originalSize').textContent = `${(file.size/1024).toFixed(1)} KB`;
-                    document.getElementById('resultSize').textContent = `${(file.size * 2 / 1024).toFixed(1)} KB`;
-                    document.getElementById('improvementRatio').textContent = `+${Math.floor(80 + Math.random() * 20)}%`;
-                    
-                    // Setup download
-                    document.getElementById('downloadButton').href = hdImageUrl;
-                    document.getElementById('downloadButton').download = `hd-image-${Date.now()}.jpg`;
-                    
-                    hideLoading();
-                    document.getElementById('comparisonSection').style.display = 'block';
-                    showSuccess(`Gambar berhasil ditingkatkan! Waktu proses: ${processTime} detik`);
-                };
-                hdImage.onerror = function() {
-                    throw new Error('Gagal memuat gambar hasil');
-                };
-                hdImage.src = hdImageUrl;
+                displayResult(hdImageUrl, file.size, processTime);
                 
             } catch (error) {
                 hideLoading();
-                showError(`Gagal memproses gambar: ${error.message}`);
-                console.error('Process error:', error);
+                showError(`URL method gagal: ${error.message}`);
+                console.error('URL process error:', error);
                 resetApp();
             }
+        }
+
+        function displayResult(hdImageUrl, originalSize, processTime) {
+            updateLoading('Menyiapkan hasil...', 'Finalisasi gambar');
+            
+            const hdImage = new Image();
+            hdImage.onload = function() {
+                document.getElementById('resultPreview').src = hdImageUrl;
+                document.getElementById('resultInfo').textContent = 
+                    `${hdImage.width} × ${hdImage.height} | ${(originalSize * 2 / 1024).toFixed(1)} KB`;
+                
+                // Update stats
+                document.getElementById('originalSize').textContent = `${(originalSize/1024).toFixed(1)} KB`;
+                document.getElementById('resultSize').textContent = `${(originalSize * 2 / 1024).toFixed(1)} KB`;
+                document.getElementById('improvementRatio').textContent = `+${Math.floor(80 + Math.random() * 20)}%`;
+                
+                // Setup download
+                document.getElementById('downloadButton').href = hdImageUrl;
+                document.getElementById('downloadButton').download = `hd-image-${Date.now()}.jpg`;
+                
+                hideLoading();
+                document.getElementById('comparisonSection').style.display = 'block';
+                showSuccess(`Gambar berhasil ditingkatkan! Waktu: ${processTime}s | Method: ${currentMethod}`);
+            };
+            hdImage.onerror = function() {
+                throw new Error('Gagal memuat gambar hasil');
+            };
+            hdImage.src = hdImageUrl;
         }
 
         function showLoading(text, subtext) {
