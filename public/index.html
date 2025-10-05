@@ -612,346 +612,373 @@
     </div>
 
     <script>
-        // Base URL untuk API backend
-        const API_BASE_URL = window.location.origin;
+    // Base URL untuk API backend
+    const API_BASE_URL = window.location.origin;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Element references
+        const imageUrlInput = document.getElementById('imageUrl');
+        const scaleFactorSelect = document.getElementById('scaleFactor');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const originalPlaceholder = document.getElementById('originalPlaceholder');
+        const originalImage = document.getElementById('originalImage');
+        const resultPlaceholder = document.getElementById('resultPlaceholder');
+        const resultImage = document.getElementById('resultImage');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const resultSection = document.getElementById('resultSection');
+        const finalResultImage = document.getElementById('finalResultImage');
+        const downloadLink = document.getElementById('downloadLink');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadEnhanceBtn = document.getElementById('uploadEnhanceBtn');
+        const uploadScaleFactor = document.getElementById('uploadScaleFactor');
+        const urlText = document.getElementById('urlText');
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        const uploadToCatboxBtn = document.getElementById('uploadToCatboxBtn');
+        const newEnhancementBtn = document.getElementById('newEnhancementBtn');
+        const serverStatus = document.getElementById('serverStatus');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
         
-        document.addEventListener('DOMContentLoaded', function() {
-            // Element references
-            const imageUrlInput = document.getElementById('imageUrl');
-            const scaleFactorSelect = document.getElementById('scaleFactor');
-            const enhanceBtn = document.getElementById('enhanceBtn');
-            const originalPlaceholder = document.getElementById('originalPlaceholder');
-            const originalImage = document.getElementById('originalImage');
-            const resultPlaceholder = document.getElementById('resultPlaceholder');
-            const resultImage = document.getElementById('resultImage');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const loadingText = document.getElementById('loadingText');
-            const resultSection = document.getElementById('resultSection');
-            const finalResultImage = document.getElementById('finalResultImage');
-            const downloadLink = document.getElementById('downloadLink');
-            const fileInput = document.getElementById('fileInput');
-            const fileName = document.getElementById('fileName');
-            const uploadEnhanceBtn = document.getElementById('uploadEnhanceBtn');
-            const uploadScaleFactor = document.getElementById('uploadScaleFactor');
-            const urlText = document.getElementById('urlText');
-            const copyUrlBtn = document.getElementById('copyUrlBtn');
-            const uploadToCatboxBtn = document.getElementById('uploadToCatboxBtn');
-            const newEnhancementBtn = document.getElementById('newEnhancementBtn');
-            const serverStatus = document.getElementById('serverStatus');
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            let currentEnhancedImageBlob = null;
-            let currentImageDataUrl = null;
-            let uploadedImageUrl = null;
-            
-            // Check server status
-            checkServerStatus();
-            
-            // Tab functionality
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Show active tab content
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === tabId) {
-                            content.classList.add('active');
-                        }
-                    });
+        let currentEnhancedImageBlob = null;
+        let currentImageDataUrl = null;
+        let uploadedImageUrl = null;
+        
+        // Check server status
+        checkServerStatus();
+        
+        // Tab functionality
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show active tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
                 });
             });
-            
-            // Event listener untuk input URL gambar
-            imageUrlInput.addEventListener('input', function() {
-                const url = this.value.trim();
-                if (url) {
-                    showOriginalImage(url);
-                } else {
-                    resetImageDisplay();
-                }
-            });
-            
-            // Event listener untuk file input
-            fileInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const file = this.files[0];
-                    fileName.textContent = file.name;
-                    
-                    // Tampilkan preview gambar
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        showOriginalImage(e.target.result);
-                        currentImageDataUrl = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    fileName.textContent = 'Belum ada file dipilih';
-                    resetImageDisplay();
-                }
-            });
-            
-            // Event listener untuk tombol enhance dari URL
-            enhanceBtn.addEventListener('click', function() {
-                const imageUrl = imageUrlInput.value.trim();
-                const scaleFactor = scaleFactorSelect.value;
-                
-                if (!imageUrl) {
-                    alert('Silakan masukkan URL gambar terlebih dahulu!');
-                    return;
-                }
-                
-                enhanceImage(imageUrl, scaleFactor);
-            });
-            
-            // Event listener untuk tombol upload & enhance
-            uploadEnhanceBtn.addEventListener('click', function() {
-                if (!fileInput.files || !fileInput.files[0]) {
-                    alert('Silakan pilih gambar terlebih dahulu!');
-                    return;
-                }
-                
-                const scaleFactor = uploadScaleFactor.value;
-                const file = fileInput.files[0];
-                
-                // Upload file ke server lokal dulu
-                uploadImageToServer(file, scaleFactor);
-            });
-            
-            // Event listener untuk upload ke Catbox
-            uploadToCatboxBtn.addEventListener('click', function() {
-                if (!currentEnhancedImageBlob) {
-                    alert('Tidak ada gambar hasil peningkatan yang tersedia!');
-                    return;
-                }
-                
-                uploadToCatbox(currentEnhancedImageBlob);
-            });
-            
-            // Event listener untuk copy URL
-            copyUrlBtn.addEventListener('click', function() {
-                const url = urlText.textContent;
-                if (url && url !== 'URL akan muncul di sini setelah upload') {
-                    navigator.clipboard.writeText(url).then(function() {
-                        alert('URL berhasil disalin ke clipboard!');
-                    }).catch(function() {
-                        // Fallback
-                        const textArea = document.createElement('textarea');
-                        textArea.value = url;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        alert('URL berhasil disalin!');
-                    });
-                } else {
-                    alert('Tidak ada URL yang bisa disalin!');
-                }
-            });
-            
-            // Event listener untuk tombol enhancement baru
-            newEnhancementBtn.addEventListener('click', function() {
-                resetUI();
-            });
-            
-            // Fungsi untuk menampilkan gambar asli
-            function showOriginalImage(src) {
-                originalPlaceholder.style.display = 'none';
-                originalImage.src = src;
-                originalImage.style.display = 'block';
-                
-                // Reset hasil sebelumnya
-                resultPlaceholder.style.display = 'flex';
-                resultImage.style.display = 'none';
-                resultSection.style.display = 'none';
+        });
+        
+        // Event listener untuk input URL gambar
+        imageUrlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                showOriginalImage(url);
+            } else {
+                resetImageDisplay();
             }
-            
-            // Fungsi untuk reset tampilan
-            function resetImageDisplay() {
-                originalPlaceholder.style.display = 'flex';
-                originalImage.style.display = 'none';
-                resultPlaceholder.style.display = 'flex';
-                resultImage.style.display = 'none';
-                resultSection.style.display = 'none';
-            }
-            
-            // Fungsi untuk reset UI
-            function resetUI() {
-                imageUrlInput.value = '';
-                fileInput.value = '';
+        });
+        
+        // Event listener untuk file input
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileName.textContent = file.name;
+                
+                // Tampilkan preview gambar
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    showOriginalImage(e.target.result);
+                    currentImageDataUrl = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
                 fileName.textContent = 'Belum ada file dipilih';
                 resetImageDisplay();
-                currentEnhancedImageBlob = null;
-                currentImageDataUrl = null;
-                uploadedImageUrl = null;
-                urlText.textContent = 'URL akan muncul di sini setelah upload';
+            }
+        });
+        
+        // Event listener untuk tombol enhance dari URL
+        enhanceBtn.addEventListener('click', function() {
+            const imageUrl = imageUrlInput.value.trim();
+            const scaleFactor = scaleFactorSelect.value;
+            
+            if (!imageUrl) {
+                alert('Silakan masukkan URL gambar terlebih dahulu!');
+                return;
             }
             
-            // Fungsi untuk meningkatkan kualitas gambar
-            function enhanceImage(imageUrl, scaleFactor) {
-                showLoading('Sedang meningkatkan kualitas gambar...');
-                
+            enhanceImage(imageUrl, scaleFactor);
+        });
+        
+        // Event listener untuk tombol upload & enhance
+        uploadEnhanceBtn.addEventListener('click', function() {
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Silakan pilih gambar terlebih dahulu!');
+                return;
+            }
+            
+            const scaleFactor = uploadScaleFactor.value;
+            const file = fileInput.files[0];
+            
+            // Upload file ke server lokal dulu
+            uploadImageToServer(file, scaleFactor);
+        });
+        
+        // Event listener untuk upload ke Catbox
+        uploadToCatboxBtn.addEventListener('click', function() {
+            if (!currentEnhancedImageBlob) {
+                alert('Tidak ada gambar hasil peningkatan yang tersedia!');
+                return;
+            }
+            
+            uploadToCatbox(currentEnhancedImageBlob);
+        });
+        
+        // Event listener untuk copy URL
+        copyUrlBtn.addEventListener('click', function() {
+            const url = urlText.textContent;
+            if (url && url !== 'URL akan muncul di sini setelah upload') {
+                navigator.clipboard.writeText(url).then(function() {
+                    alert('URL berhasil disalin ke clipboard!');
+                }).catch(function() {
+                    // Fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('URL berhasil disalin!');
+                });
+            } else {
+                alert('Tidak ada URL yang bisa disalin!');
+            }
+        });
+        
+        // Event listener untuk tombol enhancement baru
+        newEnhancementBtn.addEventListener('click', function() {
+            resetUI();
+        });
+        
+        // Fungsi untuk menampilkan gambar asli
+        function showOriginalImage(src) {
+            originalPlaceholder.style.display = 'none';
+            originalImage.src = src;
+            originalImage.style.display = 'block';
+            
+            // Reset hasil sebelumnya
+            resultPlaceholder.style.display = 'flex';
+            resultImage.style.display = 'none';
+            resultSection.style.display = 'none';
+        }
+        
+        // Fungsi untuk reset tampilan
+        function resetImageDisplay() {
+            originalPlaceholder.style.display = 'flex';
+            originalImage.style.display = 'none';
+            resultPlaceholder.style.display = 'flex';
+            resultImage.style.display = 'none';
+            resultSection.style.display = 'none';
+        }
+        
+        // Fungsi untuk reset UI
+        function resetUI() {
+            imageUrlInput.value = '';
+            fileInput.value = '';
+            fileName.textContent = 'Belum ada file dipilih';
+            resetImageDisplay();
+            currentEnhancedImageBlob = null;
+            currentImageDataUrl = null;
+            uploadedImageUrl = null;
+            urlText.textContent = 'URL akan muncul di sini setelah upload';
+        }
+        
+        // Fungsi untuk meningkatkan kualitas gambar
+        async function enhanceImage(imageUrl, scaleFactor) {
+            showLoading('Sedang meningkatkan kualitas gambar...');
+            
+            try {
                 const apiUrl = `${API_BASE_URL}/api/enhance?image=${encodeURIComponent(imageUrl)}&scale=${scaleFactor}`;
+                console.log('Enhancing with URL:', apiUrl);
                 
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Gagal memproses gambar');
-                        }
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        currentEnhancedImageBlob = blob;
-                        const imageUrl = URL.createObjectURL(blob);
-                        
-                        showResult(imageUrl);
-                        hideLoading();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        hideLoading();
-                        alert('Terjadi kesalahan saat memproses gambar: ' + error.message);
-                    });
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const blob = await response.blob();
+                
+                if (blob.size === 0) {
+                    throw new Error('Gambar hasil kosong atau tidak valid');
+                }
+                
+                currentEnhancedImageBlob = blob;
+                const imageUrl = URL.createObjectURL(blob);
+                
+                showResult(imageUrl);
+                hideLoading();
+                
+            } catch (error) {
+                console.error('Enhance Error:', error);
+                hideLoading();
+                alert('Terjadi kesalahan saat memproses gambar: ' + error.message);
             }
+        }
+        
+        // Fungsi untuk upload gambar ke server
+        async function uploadImageToServer(file, scaleFactor) {
+            showLoading('Sedang mengupload gambar...');
             
-            // Fungsi untuk upload gambar ke server
-            function uploadImageToServer(file, scaleFactor) {
-                showLoading('Sedang mengupload gambar...');
-                
+            try {
                 const formData = new FormData();
                 formData.append('image', file);
                 
-                fetch(`${API_BASE_URL}/api/upload-local`, {
+                const response = await fetch(`${API_BASE_URL}/api/upload-local`, {
                     method: 'POST',
                     body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        uploadedImageUrl = data.url;
-                        // Sekarang enhance gambar yang sudah diupload
-                        enhanceImage(uploadedImageUrl, scaleFactor);
-                    } else {
-                        throw new Error(data.error || 'Upload gagal');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    hideLoading();
-                    alert('Gagal mengupload gambar: ' + error.message);
                 });
-            }
-            
-            // Fungsi untuk upload ke Catbox
-            function uploadToCatbox(blob) {
-                showLoading('Sedang mengupload ke Catbox...');
                 
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Upload gagal');
+                }
+                
+                if (data.success) {
+                    uploadedImageUrl = data.url;
+                    console.log('Image uploaded to:', uploadedImageUrl);
+                    // Sekarang enhance gambar yang sudah diupload
+                    await enhanceImage(uploadedImageUrl, scaleFactor);
+                } else {
+                    throw new Error(data.error || 'Upload gagal');
+                }
+                
+            } catch (error) {
+                console.error('Upload Error:', error);
+                hideLoading();
+                alert('Gagal mengupload gambar: ' + error.message);
+            }
+        }
+        
+        // Fungsi untuk upload ke Catbox
+        async function uploadToCatbox(blob) {
+            showLoading('Sedang mengupload ke Catbox...');
+            
+            try {
                 const formData = new FormData();
                 formData.append('image', blob, 'enhanced_image.jpg');
                 
-                fetch(`${API_BASE_URL}/api/upload-catbox`, {
+                const response = await fetch(`${API_BASE_URL}/api/upload-catbox`, {
                     method: 'POST',
                     body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    
-                    if (data.success) {
-                        urlText.textContent = data.url;
-                        alert('Gambar berhasil diupload ke Catbox! URL telah disalin ke hasil.');
-                    } else {
-                        throw new Error(data.error || 'Upload ke Catbox gagal');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    hideLoading();
-                    alert('Gagal mengupload ke Catbox: ' + error.message);
                 });
-            }
-            
-            // Fungsi untuk menampilkan hasil
-            function showResult(imageUrl) {
-                resultPlaceholder.style.display = 'none';
-                resultImage.src = imageUrl;
-                resultImage.style.display = 'block';
                 
-                finalResultImage.src = imageUrl;
-                downloadLink.href = imageUrl;
-                resultSection.style.display = 'block';
+                const data = await response.json();
                 
-                // Scroll ke hasil
-                resultSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            // Fungsi untuk menampilkan loading
-            function showLoading(message) {
-                loadingText.textContent = message;
-                loadingIndicator.style.display = 'block';
-                enhanceBtn.disabled = true;
-                uploadEnhanceBtn.disabled = true;
-            }
-            
-            // Fungsi untuk menyembunyikan loading
-            function hideLoading() {
-                loadingIndicator.style.display = 'none';
-                enhanceBtn.disabled = false;
-                uploadEnhanceBtn.disabled = false;
-            }
-            
-            // Fungsi untuk cek status server
-            function checkServerStatus() {
-                fetch(`${API_BASE_URL}/api/health`)
-                    .then(response => response.json())
-                    .then(data => {
-                        serverStatus.innerHTML = `
-                            <div class="status-dot"></div>
-                            <span>Server Connected - ${data.timestamp}</span>
-                        `;
-                    })
-                    .catch(error => {
-                        console.error('Server status check failed:', error);
-                        serverStatus.innerHTML = `
-                            <div class="status-dot" style="background: #e53e3e;"></div>
-                            <span>Server Disconnected</span>
-                        `;
-                        serverStatus.style.background = '#e53e3e';
-                    });
-            }
-            
-            // Drag and drop functionality
-            const fileInputLabel = document.querySelector('.file-input-label');
-            
-            fileInputLabel.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#667eea';
-                this.style.background = '#edf2f7';
-            });
-            
-            fileInputLabel.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#cbd5e0';
-                this.style.background = '#f8fafc';
-            });
-            
-            fileInputLabel.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#cbd5e0';
-                this.style.background = '#f8fafc';
-                
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    fileInput.files = e.dataTransfer.files;
-                    const event = new Event('change');
-                    fileInput.dispatchEvent(event);
+                if (!response.ok) {
+                    throw new Error(data.error || 'Upload ke Catbox gagal');
                 }
-            });
+                
+                hideLoading();
+                
+                if (data.success) {
+                    urlText.textContent = data.url;
+                    alert('Gambar berhasil diupload ke Catbox! URL telah disalin ke hasil.');
+                } else {
+                    throw new Error(data.error || 'Upload ke Catbox gagal');
+                }
+                
+            } catch (error) {
+                console.error('Catbox Upload Error:', error);
+                hideLoading();
+                alert('Gagal mengupload ke Catbox: ' + error.message);
+            }
+        }
+        
+        // Fungsi untuk menampilkan hasil
+        function showResult(imageUrl) {
+            resultPlaceholder.style.display = 'none';
+            resultImage.src = imageUrl;
+            resultImage.style.display = 'block';
+            
+            finalResultImage.src = imageUrl;
+            downloadLink.href = imageUrl;
+            resultSection.style.display = 'block';
+            
+            // Scroll ke hasil
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Fungsi untuk menampilkan loading
+        function showLoading(message) {
+            loadingText.textContent = message;
+            loadingIndicator.style.display = 'block';
+            enhanceBtn.disabled = true;
+            uploadEnhanceBtn.disabled = true;
+        }
+        
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            loadingIndicator.style.display = 'none';
+            enhanceBtn.disabled = false;
+            uploadEnhanceBtn.disabled = false;
+        }
+        
+        // Fungsi untuk cek status server
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                serverStatus.innerHTML = `
+                    <div class="status-dot"></div>
+                    <span>Server Connected - ${new Date().toLocaleTimeString()}</span>
+                `;
+                serverStatus.style.background = '#48bb78';
+                
+            } catch (error) {
+                console.error('Server status check failed:', error);
+                serverStatus.innerHTML = `
+                    <div class="status-dot" style="background: #e53e3e;"></div>
+                    <span>Server Error - ${error.message}</span>
+                `;
+                serverStatus.style.background = '#e53e3e';
+            }
+        }
+        
+        // Drag and drop functionality
+        const fileInputLabel = document.querySelector('.file-input-label');
+        
+        fileInputLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#667eea';
+            this.style.background = '#edf2f7';
         });
-    </script>
+        
+        fileInputLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e0';
+            this.style.background = '#f8fafc';
+        });
+        
+        fileInputLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e0';
+            this.style.background = '#f8fafc';
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+    });
+</script>
 </body>
 </html>
