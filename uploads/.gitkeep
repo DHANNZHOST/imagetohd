@@ -1,0 +1,4 @@
+# This folder is used for temporary image uploads
+# Server will automatically create this folder if it doesn't exist
+# All files in this folder are automatically cleaned up
+# DO NOT commit actual image files to this repository
