@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upscaler - HD Quality</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e9ff;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .preview-area {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .image-box {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+
+        .image-box h3 {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .image-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .info-box {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .image-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image Upscaler HD</h1>
+        <p class="subtitle">Tingkatkan resolusi gambar hingga 4x lebih besar</p>
+
+        <div class="warning">
+            ⚠️ <strong>Catatan:</strong> Proses membutuhkan waktu 10-30 detik. API akan meningkatkan resolusi gambar 4x menggunakan AI (sama seperti bot WhatsApp).
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📸</div>
+            <h3>Klik atau Drop Gambar Disini</h3>
+            <p style="margin-top: 10px; color: #666;">Format: JPG, PNG, WEBP (Max 5MB)</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p class="loading-text" id="loadingText">Sedang memproses gambar...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="preview-area" id="previewArea">
+            <div class="image-comparison">
+                <div class="image-box">
+                    <h3>📷 Gambar Asli</h3>
+                    <img id="originalImage" alt="Original">
+                </div>
+                <div class="image-box">
+                    <h3>✨ Gambar HD (4x Upscale)</h3>
+                    <img id="hdImage" alt="HD">
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">📂 Ukuran Asli:</span>
+                    <span id="originalSize">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📂 Ukuran HD:</span>
+                    <span id="hdSize">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">⚡ Waktu Proses:</span>
+                    <span id="processTime">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📌 Keterangan:</span>
+                    <span>Resolusi ditingkatkan 4x dengan AI</span>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn" id="downloadBtn">⬇️ Download Gambar HD</button>
+                <button class="btn" id="resetBtn" style="background: #6c757d;">🔄 Upload Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const previewArea = document.getElementById('previewArea');
+        const errorDiv = document.getElementById('error');
+        const originalImage = document.getElementById('originalImage');
+        const hdImage = document.getElementById('hdImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let hdImageBlob = null;
+        let originalFileName = '';
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                processImage(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                processImage(file);
+            }
+        });
+
+        // Upload ke tmpfiles.org (sama seperti kode bot)
+        async function uploadTmpFiles(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                timeout: 120000
+            });
+
+            if (response.data && response.data.data && response.data.data.url) {
+                const idMatch = response.data.data.url.match(/\/(\d+)(?:\/|$)/);
+                const fileName = file.name;
+                if (idMatch) {
+                    return `https://tmpfiles.org/dl/${idMatch[1]}/${fileName}`;
+                }
+            }
+            throw new Error('Upload ke tmpfiles.org gagal');
+        }
+
+        async function processImage(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Ukuran file terlalu besar! Maksimal 5MB');
+                return;
+            }
+
+            originalFileName = file.name;
+            errorDiv.style.display = 'none';
+            uploadArea.style.display = 'none';
+            loading.style.display = 'block';
+            previewArea.style.display = 'none';
+
+            const startTime = Date.now();
+            const originalSize = (file.size / 1024).toFixed(2);
+
+            try {
+                // Show original image
+                loadingText.textContent = 'Membaca gambar...';
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Upload ke tmpfiles.org
+                loadingText.textContent = 'Mengupload gambar ke tmpfiles.org...';
+                const tmpFilesLink = await uploadTmpFiles(file);
+                
+                if (!tmpFilesLink) {
+                    throw new Error('Gagal mendapatkan URL dari tmpfiles.org');
+                }
+
+                console.log('TmpFiles URL:', tmpFilesLink);
+                
+                loadingText.textContent = 'Memproses upscale 4x dengan AI... (harap tunggu)';
+
+                // Upscale menggunakan API (sama seperti bot)
+                const upscaleUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(tmpFilesLink)}&scale=4`;
+                
+                console.log('Upscale URL:', upscaleUrl);
+
+                const upscaleResponse = await axios.get(upscaleUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 120000
+                });
+
+                loadingText.textContent = 'Selesai! Memuat hasil...';
+
+                hdImageBlob = new Blob([upscaleResponse.data], { type: 'image/jpeg' });
+                const hdSize = (hdImageBlob.size / 1024).toFixed(2);
+                const processTime = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                // Show HD image
+                hdImage.src = URL.createObjectURL(hdImageBlob);
+
+                // Update info
+                document.getElementById('originalSize').textContent = `${originalSize} KB`;
+                document.getElementById('hdSize').textContent = `${hdSize} KB`;
+                document.getElementById('processTime').textContent = `${processTime} detik`;
+
+                // Show results
+                loading.style.display = 'none';
+                previewArea.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                uploadArea.style.display = 'block';
+                
+                const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+                showError('Gagal memproses gambar: ' + errorMsg + '. Silakan coba lagi.');
+            }
+        }
+
+        function showError(message) {
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (hdImageBlob) {
+                const url = URL.createObjectURL(hdImageBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const name = originalFileName.split('.')[0];
+                a.download = `${name}_HD_4x_${Date.now()}.jpg`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            previewArea.style.display = 'none';
+            uploadArea.style.display = 'block';
+            hdImageBlob = null;
+            originalFileName = '';
+        });
+    </script>
+</body>
+</html>
