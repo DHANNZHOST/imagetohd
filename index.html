@@ -16,187 +16,136 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-            transition: all 0.3s ease;
+            padding: 15px;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            padding: 25px 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
 
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 8px;
-            font-size: 1.5em;
-            transition: all 0.3s ease;
+            font-size: 1.8em;
+            font-weight: 700;
         }
 
         .subtitle {
             text-align: center;
             color: #666;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            font-size: 1em;
+            line-height: 1.4;
         }
 
         .upload-area {
-            border: 2px dashed #667eea;
-            border-radius: 10px;
-            padding: 30px 15px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 35px 20px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             cursor: pointer;
             background: #f8f9ff;
             transition: all 0.3s ease;
         }
 
-        .upload-area:hover {
+        .upload-area:hover, .upload-area:active {
             background: #eef2ff;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            border-color: #5a6fd8;
         }
 
-        .upload-area:active {
-            transform: translateY(0);
+        .upload-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
         }
 
         .upload-text {
-            font-size: 1.1em;
+            font-size: 1.3em;
             color: #333;
             margin-bottom: 8px;
-            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .upload-subtext {
             color: #666;
-            font-size: 0.8em;
-            transition: all 0.3s ease;
+            font-size: 0.9em;
         }
 
         #fileInput {
             display: none;
         }
 
-        .preview-container {
+        .preview-section {
             display: none;
-            gap: 15px;
-            margin-bottom: 20px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
-        }
-
-        .preview-container.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .preview-box {
-            flex: 1;
-            text-align: center;
-            transition: all 0.3s ease;
+            margin-bottom: 25px;
         }
 
         .preview-title {
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin-bottom: 15px;
             color: #333;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
+            font-size: 1.1em;
+            text-align: center;
         }
 
-        .original-title {
-            color: #667eea;
-        }
-
-        .result-title {
-            color: #4caf50;
+        .preview-image-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
         }
 
         .preview-image {
             width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            max-height: 300px;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
             object-fit: contain;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.5s ease;
         }
 
-        .preview-image.loaded {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .placeholder {
-            width: 100%;
-            height: 150px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-style: italic;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
+        .image-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.85em;
         }
 
         .button-group {
             display: none;
-            gap: 10px;
+            gap: 12px;
             flex-direction: column;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
-        }
-
-        .button-group.show {
-            opacity: 1;
-            transform: translateY(0);
+            margin-top: 20px;
         }
 
         .btn {
-            padding: 14px 20px;
+            padding: 16px 24px;
             border: none;
-            border-radius: 8px;
-            font-size: 1em;
+            border-radius: 12px;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
             position: relative;
-            overflow: hidden;
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-success {
-            background: #4caf50;
+            background: linear-gradient(135deg, #4caf50, #45a049);
             color: white;
-        }
-
-        .btn-success:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
 
         .btn-secondary {
@@ -204,36 +153,29 @@
             color: white;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
         .btn:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
 
         .btn-loading {
-            position: relative;
             color: transparent;
         }
 
         .btn-loading::after {
             content: '';
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             top: 50%;
             left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
+            margin-left: -11px;
+            margin-top: -11px;
             border: 2px solid #ffffff;
             border-radius: 50%;
             border-top-color: transparent;
@@ -243,77 +185,62 @@
         .loading {
             display: none;
             text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.5s ease;
-        }
-
-        .loading.show {
-            opacity: 1;
-            transform: scale(1);
+            margin: 25px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
 
-        .pulse {
-            animation: pulse 1.5s ease-in-out infinite;
+        .loading-text {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 500;
         }
 
-        /* Footer Styles */
         .footer {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
-        }
-
-        .footer.show {
-            opacity: 1;
-            transform: translateY(0);
+            border-top: 1px solid #e9ecef;
         }
 
         .copyright {
             color: #666;
-            font-size: 0.8em;
-            margin-bottom: 8px;
+            font-size: 0.85em;
+            margin-bottom: 12px;
         }
 
         .contact-info {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
             align-items: center;
         }
 
         .contact-link {
             color: #667eea;
             text-decoration: none;
-            font-size: 0.75em;
+            font-size: 0.8em;
             transition: all 0.3s ease;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 8px 16px;
+            border-radius: 8px;
             background: #f8f9ff;
+            font-weight: 500;
         }
 
-        .contact-link:hover {
+        .contact-link:active {
             background: #667eea;
             color: white;
-            transform: translateY(-2px);
         }
 
         .channel-link {
@@ -321,7 +248,7 @@
             background: #f1f8e9;
         }
 
-        .channel-link:hover {
+        .channel-link:active {
             background: #4caf50;
             color: white;
         }
@@ -331,31 +258,39 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
         }
 
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
+        /* Improved mobile responsiveness */
+        @media (max-width: 380px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.6em;
+            }
+            
+            .upload-area {
+                padding: 25px 15px;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                font-size: 1em;
+            }
         }
 
         @media (min-width: 768px) {
             .container {
                 max-width: 500px;
-                padding: 30px;
+                padding: 35px 30px;
             }
             
             .button-group {
@@ -366,17 +301,9 @@
             .btn {
                 width: auto;
                 flex: 1;
-                min-width: 120px;
+                min-width: 140px;
             }
             
-            .preview-image {
-                max-height: 250px;
-            }
-            
-            .placeholder {
-                height: 200px;
-            }
-
             .contact-info {
                 flex-direction: row;
                 justify-content: center;
@@ -386,45 +313,39 @@
     </style>
 </head>
 <body>
-    <div class="container fade-in-up">
+    <div class="container fade-in">
         <h1>🖼️ Image HD Upscaler</h1>
-        <p class="subtitle">Tingkatkan kualitas gambar menjadi HD</p>
+        <p class="subtitle">Tingkatkan kualitas gambar menjadi HD secara instan</p>
         
         <div class="upload-area" id="uploadArea">
             <div>
-                <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
-                <div class="upload-text">Pilih Gambar</div>
-                <div class="upload-subtext">JPG, PNG, JPEG (Max 10MB)</div>
+                <span class="upload-icon">📁</span>
+                <div class="upload-text">Ketuk untuk Memilih Gambar</div>
+                <div class="upload-subtext">Format: JPG, PNG, JPEG (Maksimal 10MB)</div>
             </div>
             <input type="file" id="fileInput" accept="image/*">
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <div class="pulse">Memproses gambar menjadi HD...</div>
+            <div class="loading-text">Sedang memproses gambar...</div>
         </div>
 
-        <div class="preview-container" id="previewContainer">
-            <div class="preview-box">
-                <div class="preview-title original-title">Gambar Asli</div>
-                <img id="originalPreview" class="preview-image" alt="Original">
-                <div id="originalPlaceholder" class="placeholder">Gambar asli</div>
-            </div>
-            <div class="preview-box">
-                <div class="preview-title result-title">Hasil HD</div>
-                <img id="resultPreview" class="preview-image" alt="Result">
-                <div id="resultPlaceholder" class="placeholder">Hasil HD</div>
+        <div class="preview-section" id="previewSection">
+            <div class="preview-title">Hasil HD</div>
+            <div class="preview-image-container">
+                <img id="resultPreview" class="preview-image" alt="Hasil HD">
+                <div class="image-info">Gambar telah ditingkatkan kualitasnya menjadi HD</div>
             </div>
         </div>
 
         <div class="button-group" id="buttonGroup">
-            <button class="btn btn-primary" id="processBtn">Proses HD</button>
-            <button class="btn btn-success" id="downloadBtn" disabled>Download</button>
-            <button class="btn btn-secondary" id="resetBtn">Ulangi</button>
+            <button class="btn btn-primary" id="processBtn">Proses Menjadi HD</button>
+            <button class="btn btn-success" id="downloadBtn" disabled>Download Gambar HD</button>
+            <button class="btn btn-secondary" id="resetBtn">Ulangi dengan Gambar Baru</button>
         </div>
 
-        <!-- Footer dengan Copyright & Kontak -->
-        <div class="footer" id="footer">
+        <div class="footer">
             <div class="copyright">
                 &copy; 2024 DhanXzz - Image HD Upscaler
             </div>
@@ -442,38 +363,29 @@
     <script>
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
-        const previewContainer = document.getElementById('previewContainer');
-        const originalPreview = document.getElementById('originalPreview');
+        const previewSection = document.getElementById('previewSection');
         const resultPreview = document.getElementById('resultPreview');
-        const originalPlaceholder = document.getElementById('originalPlaceholder');
-        const resultPlaceholder = document.getElementById('resultPlaceholder');
         const buttonGroup = document.getElementById('buttonGroup');
         const processBtn = document.getElementById('processBtn');
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
         const loading = document.getElementById('loading');
-        const footer = document.getElementById('footer');
 
         let processedImageUrl = null;
 
-        // Event listeners
+        // Event listeners untuk mobile touch
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFileSelect);
         processBtn.addEventListener('click', processImage);
         downloadBtn.addEventListener('click', downloadImage);
         resetBtn.addEventListener('click', resetApp);
 
-        // Show footer setelah halaman load
-        setTimeout(() => {
-            footer.classList.add('show');
-        }, 1000);
-
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             if (!file.type.startsWith('image/')) {
-                showError('Pilih file gambar yang valid!');
+                showError('Silakan pilih file gambar yang valid!');
                 return;
             }
 
@@ -482,47 +394,23 @@
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Hide upload area dengan animasi
-                uploadArea.style.opacity = '0.5';
-                uploadArea.style.transform = 'scale(0.98)';
-                
-                setTimeout(() => {
-                    originalPreview.src = e.target.result;
-                    originalPreview.onload = () => {
-                        originalPreview.classList.add('loaded');
-                        originalPlaceholder.style.display = 'none';
-                    };
-                    
-                    previewContainer.style.display = 'flex';
-                    setTimeout(() => previewContainer.classList.add('show'), 50);
-                    
-                    buttonGroup.style.display = 'flex';
-                    setTimeout(() => buttonGroup.classList.add('show'), 100);
-                    
-                    resultPreview.style.display = 'none';
-                    resultPlaceholder.style.display = 'block';
-                    downloadBtn.disabled = true;
-                    
-                    processedImageUrl = null;
-                }, 300);
-            };
-            reader.readAsDataURL(file);
+            // Langsung proses gambar setelah dipilih
+            processImage();
         }
 
         async function processImage() {
             const file = fileInput.files[0];
-            if (!file) return;
+            if (!file) {
+                showError('Silakan pilih gambar terlebih dahulu!');
+                return;
+            }
 
-            // Loading effect pada tombol
-            processBtn.classList.add('btn-loading');
-            processBtn.disabled = true;
+            // Sembunyikan upload area dan tombol proses
+            uploadArea.style.display = 'none';
+            processBtn.style.display = 'none';
             
-            // Show loading dengan animasi
+            // Tampilkan loading
             loading.style.display = 'block';
-            setTimeout(() => loading.classList.add('show'), 50);
-            
             downloadBtn.disabled = true;
 
             const formData = new FormData();
@@ -535,44 +423,30 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Gagal memproses gambar');
+                    throw new Error('Gagal memproses gambar. Coba lagi.');
                 }
 
                 const blob = await response.blob();
                 
                 if (blob.size === 0) {
-                    throw new Error('Gambar hasil kosong');
+                    throw new Error('Gambar hasil kosong. Coba dengan gambar lain.');
                 }
 
                 processedImageUrl = URL.createObjectURL(blob);
                 
-                // Hide loading dengan animasi
-                loading.classList.remove('show');
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                    
-                    // Show result dengan animasi
-                    resultPreview.src = processedImageUrl;
-                    resultPreview.style.display = 'block';
-                    resultPreview.onload = () => {
-                        resultPreview.classList.add('loaded');
-                        resultPlaceholder.style.display = 'none';
-                    };
-                    
-                    downloadBtn.disabled = false;
-                    
-                    // Hilangkan tombol proses dengan animasi
-                    processBtn.style.opacity = '0';
-                    processBtn.style.transform = 'scale(0.8)';
-                    setTimeout(() => {
-                        processBtn.style.display = 'none';
-                    }, 300);
-                    
-                }, 500);
+                // Tampilkan hasil preview
+                resultPreview.src = processedImageUrl;
+                previewSection.style.display = 'block';
+                downloadBtn.disabled = false;
+                
+                // Tampilkan tombol group
+                buttonGroup.style.display = 'flex';
 
             } catch (error) {
-                showError('Error: ' + error.message);
-                resetProcessingState();
+                showError(error.message);
+                resetApp();
+            } finally {
+                loading.style.display = 'none';
             }
         }
 
@@ -587,108 +461,75 @@
             setTimeout(() => {
                 const a = document.createElement('a');
                 a.href = processedImageUrl;
-                a.download = 'hd-image-' + Date.now() + '.png';
+                a.download = 'gambar-hd-' + Date.now() + '.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 
                 // Reset tombol download
-                downloadBtn.classList.remove('btn-loading');
-                downloadBtn.textContent = originalText;
-            }, 500);
+                setTimeout(() => {
+                    downloadBtn.classList.remove('btn-loading');
+                    downloadBtn.textContent = originalText;
+                    showError('✅ Gambar berhasil diunduh!');
+                }, 500);
+                
+            }, 1000);
         }
 
         function resetApp() {
-            // Animasi reset
-            previewContainer.classList.remove('show');
-            buttonGroup.classList.remove('show');
-            originalPreview.classList.remove('loaded');
-            resultPreview.classList.remove('loaded');
+            // Reset semua state
+            fileInput.value = '';
+            previewSection.style.display = 'none';
+            buttonGroup.style.display = 'none';
+            uploadArea.style.display = 'block';
+            processBtn.style.display = 'block';
+            downloadBtn.disabled = true;
+            processedImageUrl = null;
             
-            setTimeout(() => {
-                fileInput.value = '';
-                previewContainer.style.display = 'none';
-                buttonGroup.style.display = 'none';
-                originalPreview.style.display = 'none';
-                resultPreview.style.display = 'none';
-                originalPlaceholder.style.display = 'block';
-                resultPlaceholder.style.display = 'block';
-                downloadBtn.disabled = true;
-                
-                // Reset tombol proses
-                processBtn.style.display = 'block';
-                processBtn.style.opacity = '1';
-                processBtn.style.transform = 'scale(1)';
-                processBtn.classList.remove('btn-loading');
-                processBtn.disabled = false;
-                processBtn.textContent = 'Proses HD';
-                
-                // Reset upload area
-                uploadArea.style.opacity = '1';
-                uploadArea.style.transform = 'scale(1)';
-                
-                processedImageUrl = null;
-            }, 500);
-        }
-
-        function resetProcessingState() {
-            processBtn.classList.remove('btn-loading');
-            processBtn.disabled = false;
-            loading.classList.remove('show');
-            setTimeout(() => {
-                loading.style.display = 'none';
-            }, 500);
+            // Reset tombol
+            downloadBtn.classList.remove('btn-loading');
+            downloadBtn.textContent = 'Download Gambar HD';
         }
 
         function showError(message) {
-            // Buat elemen error dengan animasi
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = `
+            // Buat notifikasi error/success
+            const notification = document.createElement('div');
+            notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%) translateY(-100px);
-                background: #ff6b6b;
+                background: ${message.includes('✅') ? '#4caf50' : '#ff6b6b'};
                 color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                padding: 15px 25px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
                 z-index: 1000;
                 transition: all 0.5s ease;
-                font-size: 0.9em;
+                font-size: 0.95em;
                 text-align: center;
+                max-width: 90%;
+                word-wrap: break-word;
             `;
-            errorDiv.textContent = message;
-            document.body.appendChild(errorDiv);
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
             // Animasi masuk
             setTimeout(() => {
-                errorDiv.style.transform = 'translateX(-50%) translateY(0)';
+                notification.style.transform = 'translateX(-50%) translateY(0)';
             }, 100);
             
             // Animasi keluar setelah 3 detik
             setTimeout(() => {
-                errorDiv.style.transform = 'translateX(-50%) translateY(-100px)';
+                notification.style.transform = 'translateX(-50%) translateY(-100px)';
                 setTimeout(() => {
-                    document.body.removeChild(errorDiv);
+                    document.body.removeChild(notification);
                 }, 500);
             }, 3000);
         }
 
-        // Add some interactive effects
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add hover effects to container
-            const container = document.querySelector('.container');
-            container.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.boxShadow = '0 15px 40px rgba(0,0,0,0.2)';
-            });
-            
-            container.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-            });
-        });
+        // Optimasi untuk mobile
+        document.addEventListener('touchstart', function() {}, {passive: true});
     </script>
 </body>
 </html>
