@@ -6,58 +6,98 @@ const path = require('path');
 
 const app = express();
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Middleware - penting untuk Vercel
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (untuk frontend)
 app.use(express.static(__dirname));
 
-const storage = multer.memoryStorage();
+// Multer memory storage (WAJIB untuk Vercel, jangan pakai diskStorage)
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB
+  },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Hanya file gambar yang diizinkan!'), false);
+      cb(new Error('Hanya file gambar yang diizinkan!'));
     }
   }
 });
 
+// API endpoint untuk upscale
 app.post('/api/upscale', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'Tidak ada file yang diupload' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Tidak ada file yang diupload' 
+      });
     }
 
+    console.log('Memproses gambar:', req.file.originalname);
+
+    // Buat form data untuk API external
     const formData = new FormData();
     formData.append('image', req.file.buffer, {
       filename: req.file.originalname,
       contentType: req.file.mimetype
     });
 
+    // Kirim ke API external
     const response = await axios.post(
-      'https://api.siputzx.my.id/api/iloveimg/upscale',
+      'https://api.siputzx.my.id/api/iloveimg/upscale', 
       formData,
       {
-        headers: { ...formData.getHeaders() },
+        headers: {
+          ...formData.getHeaders(),
+        },
         responseType: 'stream',
-        timeout: 60000,
+        timeout: 45000 // 45 detik timeout
       }
     );
 
+    // Set headers untuk response
     res.setHeader('Content-Type', response.headers['content-type'] || 'image/png');
+    res.setHeader('Cache-Control', 'no-cache');
+
+    // Stream hasil ke client
     response.data.pipe(res);
 
   } catch (error) {
     console.error('Error:', error.message);
-    res.status(500).json({ error: 'Gagal memproses gambar' });
+    
+    let errorMessage = 'Gagal memproses gambar';
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = 'API server tidak dapat diakses';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = 'Timeout: Proses terlalu lama';
+    }
+
+    res.status(500).json({ 
+      success: false,
+      error: errorMessage 
+    });
   }
 });
 
+// Route untuk frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/favicon.ico', (req, res) => res.status(204).end());
+// Handle favicon
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
 
+// Handle 404
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Endpoint tidak ditemukan' });
+});
+
+// Export app untuk Vercel
 module.exports = app;
