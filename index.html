@@ -271,6 +271,61 @@
             animation: pulse 1.5s ease-in-out infinite;
         }
 
+        /* Footer Styles */
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .footer.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .copyright {
+            color: #666;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .contact-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.75em;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #f8f9ff;
+        }
+
+        .contact-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .channel-link {
+            color: #4caf50;
+            background: #f1f8e9;
+        }
+
+        .channel-link:hover {
+            background: #4caf50;
+            color: white;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -321,6 +376,12 @@
             .placeholder {
                 height: 200px;
             }
+
+            .contact-info {
+                flex-direction: row;
+                justify-content: center;
+                gap: 15px;
+            }
         }
     </style>
 </head>
@@ -361,6 +422,21 @@
             <button class="btn btn-success" id="downloadBtn" disabled>Download</button>
             <button class="btn btn-secondary" id="resetBtn">Ulangi</button>
         </div>
+
+        <!-- Footer dengan Copyright & Kontak -->
+        <div class="footer" id="footer">
+            <div class="copyright">
+                &copy; 2024 DhanXzz - Image HD Upscaler
+            </div>
+            <div class="contact-info">
+                <a href="https://wa.me/6287748834200" class="contact-link" target="_blank">
+                    📞 Laporkan Masalah
+                </a>
+                <a href="https://whatsapp.com/channel/0029Vb6UEvUG3R3eRWCxww0K" class="contact-link channel-link" target="_blank">
+                    📢 Channel WhatsApp
+                </a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -376,6 +452,7 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
         const loading = document.getElementById('loading');
+        const footer = document.getElementById('footer');
 
         let processedImageUrl = null;
 
@@ -385,6 +462,11 @@
         processBtn.addEventListener('click', processImage);
         downloadBtn.addEventListener('click', downloadImage);
         resetBtn.addEventListener('click', resetApp);
+
+        // Show footer setelah halaman load
+        setTimeout(() => {
+            footer.classList.add('show');
+        }, 1000);
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -573,6 +655,8 @@
                 box-shadow: 0 5px 15px rgba(0,0,0,0.2);
                 z-index: 1000;
                 transition: all 0.5s ease;
+                font-size: 0.9em;
+                text-align: center;
             `;
             errorDiv.textContent = message;
             document.body.appendChild(errorDiv);
