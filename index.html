@@ -1,331 +1,138 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image HD Upscaler</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+const express = require('express');
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.static(__dirname));
+app.use(express.json());
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = './uploads';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024
+    },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Hanya file gambar yang diizinkan!'));
+        }
+    }
+});
+
+// API endpoint untuk upscale image
+app.post('/api/upscale', upload.single('image'), async (req, res) => {
+    let tempFile = null;
+    
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Tidak ada file yang diupload' });
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        tempFile = req.file.path;
+        console.log('Processing image:', req.file.filename);
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+        const formData = new FormData();
+        formData.append('image', fs.createReadStream(tempFile));
 
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.2em;
-        }
+        const response = await axios.post('https://api.siputzx.my.id/api/iloveimg/upscale', formData, {
+            headers: {
+                ...formData.getHeaders(),
+            },
+            responseType: 'stream',
+            timeout: 30000,
+            maxContentLength: 50 * 1024 * 1024,
+        });
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
+        res.setHeader('Content-Type', response.headers['content-type'] || 'image/png');
+        res.setHeader('Content-Disposition', 'inline; filename="hd-image.png"');
 
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 10px;
-            padding: 40px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9ff;
-        }
+        response.data.pipe(res);
 
-        .upload-area:hover {
-            background: #eef2ff;
-            border-color: #764ba2;
-        }
-
-        .upload-area i {
-            font-size: 48px;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 1.2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .upload-subtext {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .preview-container {
-            display: none;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .preview-box {
-            flex: 1;
-            text-align: center;
-        }
-
-        .preview-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .preview-image {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .button-group {
-            display: none;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
+        response.data.on('end', () => {
+            if (tempFile && fs.existsSync(tempFile)) {
+                fs.unlinkSync(tempFile);
             }
-            
-            .preview-container {
-                flex-direction: column;
+        });
+
+        response.data.on('error', (error) => {
+            console.error('Stream error:', error);
+            if (tempFile && fs.existsSync(tempFile)) {
+                fs.unlinkSync(tempFile);
             }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🖼️ Image HD Upscaler</h1>
-        <p class="subtitle">Tingkatkan kualitas gambar menjadi HD secara instan</p>
+        });
+
+    } catch (error) {
+        console.error('Error processing image:', error);
         
-        <div class="upload-area" id="uploadArea">
-            <div>
-                <i>📁</i>
-                <div class="upload-text">Klik untuk memilih gambar</div>
-                <div class="upload-subtext">Format: JPG, PNG, JPEG (Max 10MB)</div>
-            </div>
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <div>Memproses gambar...</div>
-        </div>
-
-        <div class="preview-container" id="previewContainer">
-            <div class="preview-box">
-                <div class="preview-title">Gambar Asli</div>
-                <img id="originalPreview" class="preview-image" alt="Original">
-            </div>
-            <div class="preview-box">
-                <div class="preview-title">Hasil HD</div>
-                <img id="resultPreview" class="preview-image" alt="Result">
-            </div>
-        </div>
-
-        <div class="button-group" id="buttonGroup">
-            <button class="btn btn-primary" id="processBtn">Proses Sekarang</button>
-            <button class="btn btn-secondary" id="downloadBtn" disabled>Download HD</button>
-            <button class="btn btn-secondary" id="resetBtn">Ulangi</button>
-        </div>
-    </div>
-
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const previewContainer = document.getElementById('previewContainer');
-        const originalPreview = document.getElementById('originalPreview');
-        const resultPreview = document.getElementById('resultPreview');
-        const buttonGroup = document.getElementById('buttonGroup');
-        const processBtn = document.getElementById('processBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const loading = document.getElementById('loading');
-
-        let processedImageUrl = null;
-
-        // Event listeners
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', handleFileSelect);
-        processBtn.addEventListener('click', processImage);
-        downloadBtn.addEventListener('click', downloadImage);
-        resetBtn.addEventListener('click', resetApp);
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Validasi file type
-            if (!file.type.startsWith('image/')) {
-                alert('Silakan pilih file gambar yang valid!');
-                return;
-            }
-
-            // Validasi file size (10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file maksimal 10MB!');
-                return;
-            }
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                originalPreview.src = e.target.result;
-                previewContainer.style.display = 'flex';
-                buttonGroup.style.display = 'flex';
-                resultPreview.src = '';
-                downloadBtn.disabled = true;
-                processedImageUrl = null;
-            };
-            reader.readAsDataURL(file);
+        if (tempFile && fs.existsSync(tempFile)) {
+            fs.unlinkSync(tempFile);
         }
 
-        async function processImage() {
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            processBtn.disabled = true;
-            processBtn.textContent = 'Memproses...';
-            loading.style.display = 'block';
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const response = await fetch('/api/upscale', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal memproses gambar');
-                }
-
-                const blob = await response.blob();
-                processedImageUrl = URL.createObjectURL(blob);
-                resultPreview.src = processedImageUrl;
-                downloadBtn.disabled = false;
-
-            } catch (error) {
-                alert('Error: ' + error.message);
-                console.error('Error:', error);
-            } finally {
-                processBtn.disabled = false;
-                processBtn.textContent = 'Proses Sekarang';
-                loading.style.display = 'none';
-            }
+        let errorMessage = 'Gagal memproses gambar';
+        if (error.code === 'ECONNREFUSED') {
+            errorMessage = 'API server tidak dapat diakses';
+        } else if (error.code === 'ETIMEDOUT') {
+            errorMessage = 'Timeout: Proses terlalu lama';
+        } else if (error.response) {
+            errorMessage = `API error: ${error.response.status}`;
         }
 
-        function downloadImage() {
-            if (!processedImageUrl) return;
+        res.status(500).json({ 
+            success: false,
+            error: errorMessage
+        });
+    }
+});
 
-            const a = document.createElement('a');
-            a.href = processedImageUrl;
-            a.download = 'hd-image-' + Date.now() + '.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+// Serve favicon
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
+});
 
-        function resetApp() {
-            fileInput.value = '';
-            previewContainer.style.display = 'none';
-            buttonGroup.style.display = 'none';
-            resultPreview.src = '';
-            downloadBtn.disabled = true;
-            processedImageUrl = null;
+// Serve frontend
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Error handling
+app.use((error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Ukuran file terlalu besar. Maksimal 10MB' 
+            });
         }
-    </script>
-</body>
-</html>
+    }
+    
+    res.status(500).json({ 
+        success: false,
+        error: error.message 
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+    console.log(`📁 Upload folder: ./uploads/`);
+});
