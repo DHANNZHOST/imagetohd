@@ -3,656 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HD Image Upscaler - Base64 Version</title>
+    <title>Image Upscale HD - Enhance Image Quality</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px;
         }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1000px; margin: 0 auto; background: white;
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        
         header {
-            text-align: center;
-            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; text-align: center; padding: 40px 20px;
         }
-        
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 15px;
-            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        header p { font-size: 1.2em; opacity: 0.9; }
+        main { padding: 40px; }
         
         .upload-area {
-            background: rgba(255, 255, 255, 0.05);
-            border: 3px dashed #4ecdc4;
-            border-radius: 20px;
-            padding: 50px 20px;
-            text-align: center;
-            margin-bottom: 40px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            border: 3px dashed #667eea; border-radius: 15px; padding: 60px 20px;
+            text-align: center; transition: all 0.3s ease; background: #f8f9ff;
+            cursor: pointer; margin-bottom: 30px;
+        }
+        .upload-area:hover, .upload-area.dragover { 
+            background: #eef2ff; border-color: #764ba2; 
+        }
+        .upload-icon { font-size: 4em; margin-bottom: 20px; }
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 12px 30px; border-radius: 25px;
+            font-size: 1.1em; cursor: pointer; margin-top: 10px;
+            transition: transform 0.2s ease;
+        }
+        .upload-btn:hover { transform: translateY(-2px); }
+        
+        .progress-area { 
+            text-align: center; padding: 40px 20px; display: none; 
+        }
+        .progress-bar {
+            width: 100%; max-width: 400px; height: 20px; background: #f0f0f0;
+            border-radius: 10px; margin: 0 auto 20px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px; width: 0%; transition: width 0.3s ease;
         }
         
-        .upload-area:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: #45b7d1;
-            transform: translateY(-5px);
+        .result-area { padding: 20px; display: none; }
+        .comparison {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 30px; margin-bottom: 30px;
         }
-        
-        .upload-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            display: block;
+        .image-box { 
+            flex: 1; text-align: center; padding: 20px;
+            background: #f8f9fa; border-radius: 15px;
         }
-        
-        .upload-text {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            font-weight: 600;
+        .image-box h3 { margin-bottom: 15px; color: #333; }
+        .image-box img { 
+            max-width: 100%; max-height: 350px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        .image-info { 
+            margin-top: 15px; display: flex; justify-content: space-around;
+            color: #666; font-size: 0.9em;
+        }
+        .arrow { font-size: 2em; color: #667eea; }
         
-        .btn {
-            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+        .action-buttons { 
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+        }
+        .download-btn, .new-image-btn {
+            padding: 12px 25px; border: none; border-radius: 25px;
+            font-size: 1em; cursor: pointer; transition: transform 0.2s ease;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        .new-image-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
+        .download-btn:hover, .new-image-btn:hover { transform: translateY(-2px); }
         
-        .btn:disabled {
-            background: #4a5568;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        .error-area { 
+            text-align: center; padding: 40px 20px; display: none; 
         }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .comparison-section {
-            display: none;
-            margin: 40px 0;
-        }
-        
-        .comparison-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .comparison-container {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .comparison-box {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-        }
-        
-        .box-title {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #4ecdc4;
-        }
-        
-        .image-container {
-            position: relative;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .image-preview {
-            width: 100%;
-            display: block;
-        }
-        
-        .quality-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .badge-original {
-            background: #667eea;
-        }
-        
-        .badge-hd {
-            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
-        }
-        
-        .stats-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .original-stat {
-            color: #667eea;
-        }
-        
-        .hd-stat {
-            color: #4ecdc4;
-        }
-        
-        .improvement-stat {
-            color: #ffd93d;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 50px;
-        }
-        
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: #4ecdc4;
-            animation: spin 1.2s linear infinite;
-            margin: 0 auto 25px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border-left: 4px solid #ef4444;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
+            background: #ffebee; color: #c62828; padding: 20px;
+            border-radius: 10px; margin-bottom: 20px;
+            border-left: 4px solid #c62828;
         }
         
-        .api-status {
-            text-align: center;
-            color: #a5b1c2;
-            margin: 10px 0;
-            font-size: 0.9rem;
+        footer {
+            text-align: center; padding: 20px; background: #f8f9fa; 
+            color: #666; border-top: 1px solid #eee;
         }
         
-        .success-message {
-            background: rgba(34, 197, 94, 0.1);
-            border-left: 4px solid #22c55e;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-        }
-        
-        .method-selector {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .method-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #4ecdc4;
-            color: #4ecdc4;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .method-btn.active {
-            background: #4ecdc4;
-            color: white;
+        @media (max-width: 768px) {
+            .comparison { flex-direction: column; }
+            .arrow { transform: rotate(90deg); margin: 20px 0; }
+            header h1 { font-size: 2em; }
+            main { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🖼️ HD Image Upscaler - Base64</h1>
-            <p style="color: #a5b1c2; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
-                Menggunakan base64 untuk proses yang lebih cepat dan reliable
-            </p>
+            <h1>🖼️ Image Upscale HD</h1>
+            <p>Enhance image quality up to 4x with AI technology</p>
         </header>
 
-        <div class="method-selector">
-            <button class="method-btn active" id="base64Btn" onclick="setMethod('base64')">
-                🔄 Base64 Method
-            </button>
-            <button class="method-btn" id="urlBtn" onclick="setMethod('url')">
-                🌐 URL Method
-            </button>
-        </div>
+        <main>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop image here or click to upload</h3>
+                    <p>Supported formats: JPG, PNG, WebP (Max. 10MB)</p>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        Select Image
+                    </button>
+                </div>
+            </div>
 
-        <div class="api-status" id="apiStatus">
-            ✅ Base64 method siap digunakan
-        </div>
-        
-        <div class="upload-area" id="uploadArea">
-            <span class="upload-icon">📸</span>
-            <p class="upload-text">Seret & Lepas Gambar di Sini</p>
-            <p style="color: #a5b1c2; margin-bottom: 25px;">ATAU</p>
-            <button class="btn" id="selectButton">
-                📁 Pilih Gambar dari Komputer
-            </button>
-            <input type="file" id="fileInput" class="file-input" accept="image/*">
-        </div>
-        
-        <div class="error-message" id="errorMessage"></div>
-        <div class="success-message" id="successMessage"></div>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p style="font-size: 1.2rem;" id="loadingText">Mempersiapkan proses...</p>
-            <p style="color: #a5b1c2;" id="loadingSubtext">Harap tunggu</p>
-        </div>
-        
-        <div class="comparison-section" id="comparisonSection">
-            <h2 class="comparison-title">✨ HASIL UPSCALE HD ✨</h2>
-            
-            <div class="comparison-container">
-                <div class="comparison-box">
-                    <div class="box-title">Sebelum (Original)</div>
-                    <div class="image-container">
-                        <img id="originalPreview" class="image-preview">
-                    </div>
-                    <div class="quality-badge badge-original">STANDARD</div>
-                    <p style="color: #a5b1c2; margin-top: 10px;" id="originalInfo">-</p>
+            <div class="progress-area" id="progressArea">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-                
-                <div class="comparison-box">
-                    <div class="box-title">Sesudah (HD)</div>
-                    <div class="image-container">
-                        <img id="resultPreview" class="image-preview">
-                    </div>
-                    <div class="quality-badge badge-hd">HIGH DEFINITION</div>
-                    <p style="color: #a5b1c2; margin-top: 10px;" id="resultInfo">-</p>
-                </div>
+                <p id="progressText">Processing image... Please wait</p>
             </div>
-            
-            <div class="stats-container">
-                <h3 style="text-align: center; margin-bottom: 25px; color: #4ecdc4;">📊 Statistik Peningkatan</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value original-stat" id="originalSize">0 KB</div>
-                        <div style="color: #a5b1c2;">Ukuran Asli</div>
+
+            <div class="result-area" id="resultArea">
+                <div class="comparison">
+                    <div class="image-box">
+                        <h3>🖼️ Original Image</h3>
+                        <img id="originalImage" alt="Original">
+                        <div class="image-info">
+                            <span>Size: <span id="originalSize">-</span> KB</span>
+                        </div>
                     </div>
                     
-                    <div class="stat-card">
-                        <div class="stat-value hd-stat" id="resultSize">0 KB</div>
-                        <div style="color: #a5b1c2;">Ukuran HD</div>
-                    </div>
+                    <div class="arrow">➡️</div>
                     
-                    <div class="stat-card">
-                        <div class="stat-value improvement-stat" id="improvementRatio">+0%</div>
-                        <div style="color: #a5b1c2;">Peningkatan Kualitas</div>
+                    <div class="image-box">
+                        <h3>✨ HD Result</h3>
+                        <img id="hdImage" alt="HD Result">
+                        <div class="image-info">
+                            <span>Size: <span id="hdSize">-</span> KB</span>
+                            <span>Time: <span id="processTime">-</span>s</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="action-buttons">
+                    <button class="download-btn" onclick="downloadHDImage()">
+                        💾 Download HD Image
+                    </button>
+                    <button class="new-image-btn" onclick="resetUpload()">
+                        🆕 New Image
+                    </button>
+                </div>
             </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn" onclick="resetApp()" style="margin-right: 15px;">
-                    🔄 Coba Gambar Lain
+
+            <div class="error-area" id="errorArea">
+                <div class="error-message" id="errorMessage"></div>
+                <button class="new-image-btn" onclick="resetUpload()">
+                    🔄 Try Again
                 </button>
-                <a href="#" class="btn" id="downloadButton" style="text-decoration: none;">
-                    ⬇️ Download Gambar HD
-                </a>
             </div>
-        </div>
+        </main>
+
+        <footer>
+            <p>Powered by AI Upscale Technology | Fast & Easy Image Enhancement</p>
+        </footer>
     </div>
 
     <script>
-        // API Configuration
-        const API_URL = 'https://api.siputzx.my.id/api/iloveimg/upscale';
-        let currentMethod = 'base64';
-        let originalFile = null;
-        let originalImage = null;
+        // Configuration - CHANGE THIS URL TO YOUR BACKEND
+        const BACKEND_URL = 'https://your-backend.vercel.app/api/upscale';
+        
+        let hdImageData = null;
+        let currentFileName = '';
 
-        function setMethod(method) {
-            currentMethod = method;
-            document.getElementById('base64Btn').classList.toggle('active', method === 'base64');
-            document.getElementById('urlBtn').classList.toggle('active', method === 'url');
-            document.getElementById('apiStatus').textContent = 
-                method === 'base64' ? '✅ Base64 method siap digunakan' : '✅ URL method siap digunakan';
-        }
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
 
-        // Base64 method - langsung kirim base64 ke API
-        async function upscaleWithBase64(base64Data) {
-            try {
-                // Bersihkan base64 dari data URL prefix
-                const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
-                
-                const upscaleUrl = `${API_URL}?image=${encodeURIComponent(cleanBase64)}&scale=4`;
-                
-                console.log('Base64 Request URL:', upscaleUrl.substring(0, 100) + '...');
-                
-                const response = await fetch(upscaleUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'image/*',
-                    },
-                    mode: 'cors'
-                });
-                
-                console.log('Response Status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
                 }
-                
-                const blob = await response.blob();
-                console.log('Blob received:', blob.size, 'bytes');
-                
-                if (blob.size === 0) {
-                    throw new Error('Response kosong dari API');
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
                 }
-                
-                return URL.createObjectURL(blob);
-            } catch (error) {
-                console.error('Base64 API Error:', error);
-                throw error;
+            });
+        });
+
+        async function handleFileSelect(file) {
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file!');
+                return;
             }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be less than 10MB!');
+                return;
+            }
+
+            currentFileName = file.name;
+            await processImage(file);
         }
 
-        // URL method - upload ke tmpfiles dulu
-        async function uploadToTmpFiles(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+        async function processImage(file) {
+            showProgress();
             
             try {
-                const response = await fetch('https://tmpfiles.org/api/v1/upload', {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                // Simulate progress
+                simulateProgress();
+                
+                const response = await fetch(BACKEND_URL, {
                     method: 'POST',
                     body: formData
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult(result);
+                } else {
+                    showError(result.message || 'Failed to process image');
                 }
-                
-                const data = await response.json();
-                console.log('TmpFiles Response:', data);
-                
-                if (data.data && data.data.url) {
-                    const url = data.data.url;
-                    const fileId = url.split('/').slice(-2, -1)[0];
-                    const fileName = file.name || 'image.jpg';
-                    
-                    return `https://tmpfiles.org/dl/${fileId}/${fileName}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Connection failed. Please check your internet connection and backend URL.');
+            }
+        }
+
+        function simulateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 90) {
+                    clearInterval(interval);
+                } else {
+                    width += Math.random() * 10;
+                    progressFill.style.width = Math.min(width, 90) + '%';
                 }
-                throw new Error('Format response tidak sesuai');
-            } catch (error) {
-                console.error('TmpFiles Error:', error);
-                throw new Error(`Gagal upload ke tmpfiles: ${error.message}`);
-            }
+            }, 200);
         }
 
-        async function upscaleWithURL(imageUrl) {
-            try {
-                const encodedUrl = encodeURIComponent(imageUrl);
-                const upscaleUrl = `${API_URL}?image=${encodedUrl}&scale=4`;
-                
-                console.log('URL Request:', upscaleUrl);
-                
-                const response = await fetch(upscaleUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'image/*',
-                    },
-                    mode: 'cors'
-                });
-                
-                console.log('Response Status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const blob = await response.blob();
-                console.log('Blob received:', blob.size, 'bytes');
-                
-                return URL.createObjectURL(blob);
-            } catch (error) {
-                console.error('URL API Error:', error);
-                throw error;
-            }
-        }
-
-        function handleFile(file) {
-            if (!file.type.match('image.*')) {
-                showError('Harap pilih file gambar (JPEG, PNG, dll.)');
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit untuk base64
-                showError('Ukuran file terlalu besar. Maksimal 5MB untuk base64 method.');
-                return;
-            }
-
-            hideMessages();
-            originalFile = file;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                originalImage = new Image();
-                originalImage.onload = function() {
-                    document.getElementById('originalPreview').src = e.target.result;
-                    document.getElementById('originalInfo').textContent = 
-                        `${originalImage.width} × ${originalImage.height} | ${(file.size/1024).toFixed(1)} KB`;
-                    
-                    document.getElementById('uploadArea').style.display = 'none';
-                    
-                    if (currentMethod === 'base64') {
-                        processWithBase64(e.target.result, file.size);
-                    } else {
-                        processWithURL(file);
-                    }
-                };
-                originalImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function processWithBase64(base64Data, fileSize) {
-            const startTime = Date.now();
+        function showProgress() {
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('errorArea').style.display = 'none';
+            document.getElementById('progressArea').style.display = 'block';
             
-            try {
-                showLoading('Memproses dengan base64...', 'Mengirim data langsung ke API');
-                
-                const hdImageUrl = await upscaleWithBase64(base64Data);
-                
-                const endTime = Date.now();
-                const processTime = ((endTime - startTime) / 1000).toFixed(2);
-                
-                displayResult(hdImageUrl, fileSize, processTime);
-                
-            } catch (error) {
-                hideLoading();
-                showError(`Base64 method gagal: ${error.message}`);
-                console.error('Base64 process error:', error);
-                resetApp();
-            }
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = '0%';
         }
 
-        async function processWithURL(file) {
-            const startTime = Date.now();
-            
-            try {
-                showLoading('Mengunggah gambar ke server...', 'Tahap 1: Upload ke tmpfiles.org');
-                
-                const tmpFilesLink = await uploadToTmpFiles(file);
-                console.log('File uploaded to:', tmpFilesLink);
-                
-                updateLoading('Memproses dengan AI...', 'Tahap 2: Meningkatkan kualitas 4x');
-                const hdImageUrl = await upscaleWithURL(tmpFilesLink);
-                
-                const endTime = Date.now();
-                const processTime = ((endTime - startTime) / 1000).toFixed(2);
-                
-                displayResult(hdImageUrl, file.size, processTime);
-                
-            } catch (error) {
-                hideLoading();
-                showError(`URL method gagal: ${error.message}`);
-                console.error('URL process error:', error);
-                resetApp();
-            }
-        }
+        function showResult(result) {
+            document.getElementById('progressArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'block';
 
-        function displayResult(hdImageUrl, originalSize, processTime) {
-            updateLoading('Menyiapkan hasil...', 'Finalisasi gambar');
-            
-            const hdImage = new Image();
-            hdImage.onload = function() {
-                document.getElementById('resultPreview').src = hdImageUrl;
-                document.getElementById('resultInfo').textContent = 
-                    `${hdImage.width} × ${hdImage.height} | ${(originalSize * 2 / 1024).toFixed(1)} KB`;
-                
-                // Update stats
-                document.getElementById('originalSize').textContent = `${(originalSize/1024).toFixed(1)} KB`;
-                document.getElementById('resultSize').textContent = `${(originalSize * 2 / 1024).toFixed(1)} KB`;
-                document.getElementById('improvementRatio').textContent = `+${Math.floor(80 + Math.random() * 20)}%`;
-                
-                // Setup download
-                document.getElementById('downloadButton').href = hdImageUrl;
-                document.getElementById('downloadButton').download = `hd-image-${Date.now()}.jpg`;
-                
-                hideLoading();
-                document.getElementById('comparisonSection').style.display = 'block';
-                showSuccess(`Gambar berhasil ditingkatkan! Waktu: ${processTime}s | Method: ${currentMethod}`);
-            };
-            hdImage.onerror = function() {
-                throw new Error('Gagal memuat gambar hasil');
-            };
-            hdImage.src = hdImageUrl;
-        }
+            // Update images and info
+            document.getElementById('originalImage').src = result.original.image;
+            document.getElementById('hdImage').src = result.hd.image;
+            document.getElementById('originalSize').textContent = result.original.size;
+            document.getElementById('hdSize').textContent = result.hd.size;
+            document.getElementById('processTime').textContent = result.processTime;
 
-        function showLoading(text, subtext) {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingSubtext').textContent = subtext;
-        }
-
-        function updateLoading(text, subtext) {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingSubtext').textContent = subtext;
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+            // Store HD image data for download
+            hdImageData = result.hd.image;
         }
 
         function showError(message) {
+            document.getElementById('progressArea').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('errorArea').style.display = 'block';
             document.getElementById('errorMessage').textContent = message;
-            document.getElementById('errorMessage').style.display = 'block';
         }
 
-        function showSuccess(message) {
-            document.getElementById('successMessage').textContent = message;
-            document.getElementById('successMessage').style.display = 'block';
+        function downloadHDImage() {
+            if (!hdImageData) return;
+            
+            const link = document.createElement('a');
+            link.href = hdImageData;
+            const originalName = currentFileName.split('.')[0];
+            link.download = `${originalName}-enhanced.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        function hideMessages() {
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-        }
-
-        function resetApp() {
-            document.getElementById('uploadArea').style.display = 'block';
-            document.getElementById('comparisonSection').style.display = 'none';
+        function resetUpload() {
             document.getElementById('fileInput').value = '';
-            hideMessages();
-            originalFile = null;
-            originalImage = null;
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('errorArea').style.display = 'none';
+            document.getElementById('progressArea').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'block';
+            
+            // Reset stored data
+            hdImageData = null;
+            currentFileName = '';
         }
-
-        // Event Listeners
-        document.getElementById('selectButton').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
-
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFile(e.target.files[0]);
-            }
-        });
-
-        // Drag and drop
-        const uploadArea = document.getElementById('uploadArea');
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.1)';
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.05)';
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(255, 255, 255, 0.05)';
-            if (e.dataTransfer.files.length) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
     </script>
 </body>
 </html>
