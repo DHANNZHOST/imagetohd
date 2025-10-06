@@ -67,7 +67,6 @@
             font-weight: 500;
         }
 
-        /* Upload Card */
         .upload-card {
             background: linear-gradient(135deg, #f8fafc, #e2e8f0);
             border: 3px dashed #cbd5e1;
@@ -126,7 +125,6 @@
             display: none;
         }
 
-        /* Preview Section - FIXED VISIBILITY */
         .preview-section {
             display: none;
             background: white;
@@ -185,7 +183,6 @@
             margin-top: 4px;
         }
 
-        /* Buttons - FIXED VISIBILITY */
         .button-group {
             display: none;
             gap: 15px;
@@ -285,7 +282,6 @@
             animation: spin 1s linear infinite;
         }
 
-        /* Loading Overlay */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -350,7 +346,6 @@
             border-radius: 3px;
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -388,7 +383,6 @@
             transform: translateY(-2px);
         }
 
-        /* Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -418,7 +412,6 @@
             animation: pulse 2s infinite;
         }
 
-        /* Responsive Design */
         @media (max-width: 480px) {
             body {
                 padding: 15px;
@@ -480,7 +473,6 @@
             <input type="file" id="fileInput" accept="image/*">
         </div>
 
-        <!-- PREVIEW SECTION - NOW VISIBLE -->
         <div class="preview-section" id="previewSection">
             <div class="section-title">🎉 Hasil HD Anda</div>
             <img id="resultPreview" class="preview-image" alt="Hasil HD">
@@ -500,7 +492,6 @@
             </div>
         </div>
 
-        <!-- BUTTON GROUP - NOW VISIBLE -->
         <div class="button-group" id="buttonGroup">
             <button class="btn btn-primary" id="processBtn">✨ Proses Sekarang</button>
             <button class="btn btn-success" id="downloadBtn">💾 Download HD</button>
@@ -522,7 +513,6 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
             <div class="loading-spinner"></div>
@@ -535,7 +525,6 @@
     </div>
 
     <script>
-        // Elements
         const uploadCard = document.getElementById('uploadCard');
         const fileInput = document.getElementById('fileInput');
         const previewSection = document.getElementById('previewSection');
@@ -547,17 +536,14 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const progressFill = document.getElementById('progressFill');
 
-        // Stats elements
         const qualityValue = document.getElementById('qualityValue');
         const sizeValue = document.getElementById('sizeValue');
         const detailValue = document.getElementById('detailValue');
 
         let processedImageUrl = null;
 
-        // Initialize - disable download button initially
         downloadBtn.disabled = true;
 
-        // Event Listeners
         uploadCard.addEventListener('click', () => fileInput.click());
         uploadCard.addEventListener('dragover', handleDragOver);
         uploadCard.addEventListener('drop', handleDrop);
@@ -595,11 +581,9 @@
                 return;
             }
 
-            // Show button group immediately when file is selected
             buttonGroup.classList.add('show');
-            
-            // Enable process button
             processBtn.disabled = false;
+            processBtn.style.display = 'block';
         }
 
         async function processImage() {
@@ -609,14 +593,12 @@
                 return;
             }
 
-            // Show loading overlay with animation
             showLoading();
 
             const formData = new FormData();
             formData.append('image', file);
 
             try {
-                // Simulate progress
                 simulateProgress();
 
                 const response = await fetch('/api/upscale', {
@@ -625,36 +607,34 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Gagal memproses gambar. Silakan coba lagi.');
+                    let errorMessage = 'Gagal memproses gambar';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (e) {
+                        errorMessage = `Error ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const blob = await response.blob();
                 
                 if (blob.size === 0) {
-                    throw new Error('Gambar hasil kosong. Coba dengan gambar lain.');
+                    throw new Error('Gambar hasil kosong');
                 }
 
                 processedImageUrl = URL.createObjectURL(blob);
                 
-                // Complete progress
                 progressFill.style.width = '100%';
                 
                 setTimeout(() => {
                     hideLoading();
-                    
-                    // Show preview section
                     previewSection.classList.add('show');
-                    
-                    // Show result
                     resultPreview.src = processedImageUrl;
                     downloadBtn.disabled = false;
-                    
-                    // Update stats
+                    processBtn.style.display = 'none';
                     updateStats();
-                    
-                    // Show success notification
                     showNotification('Gambar berhasil ditingkatkan menjadi HD! 🎉', 'success');
-                    
                 }, 800);
 
             } catch (error) {
@@ -676,8 +656,7 @@
         }
 
         function updateStats() {
-            // Random stats for demonstration
-            const improvement = Math.floor(Math.random() * 50) + 50; // 50-100%
+            const improvement = Math.floor(Math.random() * 50) + 50;
             qualityValue.textContent = 'HD+';
             sizeValue.textContent = improvement + '%';
             detailValue.textContent = 'Sangat Tinggi';
@@ -686,7 +665,6 @@
         function downloadImage() {
             if (!processedImageUrl) return;
 
-            // Show loading on download button
             downloadBtn.classList.add('btn-loading');
             downloadBtn.disabled = true;
 
@@ -698,7 +676,6 @@
                 a.click();
                 document.body.removeChild(a);
 
-                // Reset button
                 setTimeout(() => {
                     downloadBtn.classList.remove('btn-loading');
                     downloadBtn.disabled = false;
@@ -709,17 +686,14 @@
         }
 
         function resetApp() {
-            // Reset everything
             fileInput.value = '';
             previewSection.classList.remove('show');
             buttonGroup.classList.remove('show');
             downloadBtn.disabled = true;
             processBtn.disabled = true;
             processedImageUrl = null;
-            
-            // Reset progress
             progressFill.style.width = '0%';
-            
+            processBtn.style.display = 'block';
             showNotification('Pilih gambar baru untuk memulai! 📸', 'info');
         }
 
@@ -759,12 +733,10 @@
             notification.textContent = message;
             document.body.appendChild(notification);
             
-            // Animate in
             setTimeout(() => {
                 notification.style.transform = 'translateX(-50%) translateY(0)';
             }, 100);
             
-            // Animate out after 4 seconds
             setTimeout(() => {
                 notification.style.transform = 'translateX(-50%) translateY(-100px)';
                 setTimeout(() => {
@@ -773,9 +745,7 @@
             }, 4000);
         }
 
-        // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Add pulse animation to upload card
             setInterval(() => {
                 if (!fileInput.files[0]) {
                     uploadCard.classList.add('pulse');
