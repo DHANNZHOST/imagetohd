@@ -17,6 +17,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            transition: all 0.3s ease;
         }
 
         .container {
@@ -26,6 +27,7 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
 
         h1 {
@@ -33,6 +35,7 @@
             color: #333;
             margin-bottom: 8px;
             font-size: 1.5em;
+            transition: all 0.3s ease;
         }
 
         .subtitle {
@@ -40,6 +43,7 @@
             color: #666;
             margin-bottom: 20px;
             font-size: 0.9em;
+            transition: all 0.3s ease;
         }
 
         .upload-area {
@@ -50,17 +54,30 @@
             margin-bottom: 20px;
             cursor: pointer;
             background: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: #eef2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-area:active {
+            transform: translateY(0);
         }
 
         .upload-text {
             font-size: 1.1em;
             color: #333;
             margin-bottom: 8px;
+            transition: all 0.3s ease;
         }
 
         .upload-subtext {
             color: #666;
             font-size: 0.8em;
+            transition: all 0.3s ease;
         }
 
         #fileInput {
@@ -71,11 +88,20 @@
             display: none;
             gap: 15px;
             margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .preview-container.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .preview-box {
             flex: 1;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
         .preview-title {
@@ -83,6 +109,7 @@
             margin-bottom: 10px;
             color: #333;
             font-size: 0.9em;
+            transition: all 0.3s ease;
         }
 
         .original-title {
@@ -99,6 +126,14 @@
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             object-fit: contain;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+        }
+
+        .preview-image.loaded {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .placeholder {
@@ -112,12 +147,21 @@
             color: #999;
             font-style: italic;
             font-size: 0.9em;
+            transition: all 0.3s ease;
         }
 
         .button-group {
             display: none;
             gap: 10px;
             flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .button-group.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .btn {
@@ -129,6 +173,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-primary {
@@ -136,9 +182,21 @@
             color: white;
         }
 
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
         .btn-success {
             background: #4caf50;
             color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
 
         .btn-secondary {
@@ -146,84 +204,97 @@
             color: white;
         }
 
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
         }
 
         .loading {
             display: none;
             text-align: center;
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background: #f8f9fa;
             border-radius: 10px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+        }
+
+        .loading.show {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #667eea;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 15px;
         }
 
-        .comparison-slider {
-            position: relative;
-            width: 100%;
-            margin: 15px 0;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.2);
-            display: none;
-        }
-
-        .slider-before, .slider-after {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .slider-before {
-            width: 50%;
-            overflow: hidden;
-        }
-
-        .slider-handle {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: white;
-            cursor: col-resize;
-            transform: translateX(-50%);
-        }
-
-        .slider-handle::after {
-            content: '↔';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            font-size: 0.8em;
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
         }
 
         @media (min-width: 768px) {
@@ -234,11 +305,13 @@
             
             .button-group {
                 flex-direction: row;
+                flex-wrap: wrap;
             }
             
             .btn {
                 width: auto;
                 flex: 1;
+                min-width: 120px;
             }
             
             .preview-image {
@@ -252,7 +325,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container fade-in-up">
         <h1>🖼️ Image HD Upscaler</h1>
         <p class="subtitle">Tingkatkan kualitas gambar menjadi HD</p>
         
@@ -267,34 +340,25 @@
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <div>Memproses gambar...</div>
+            <div class="pulse">Memproses gambar menjadi HD...</div>
         </div>
 
         <div class="preview-container" id="previewContainer">
             <div class="preview-box">
                 <div class="preview-title original-title">Gambar Asli</div>
-                <img id="originalPreview" class="preview-image" alt="Original" style="display: none;">
+                <img id="originalPreview" class="preview-image" alt="Original">
                 <div id="originalPlaceholder" class="placeholder">Gambar asli</div>
             </div>
             <div class="preview-box">
                 <div class="preview-title result-title">Hasil HD</div>
-                <img id="resultPreview" class="preview-image" alt="Result" style="display: none;">
+                <img id="resultPreview" class="preview-image" alt="Result">
                 <div id="resultPlaceholder" class="placeholder">Hasil HD</div>
             </div>
-        </div>
-
-        <div class="comparison-slider" id="comparisonSlider">
-            <img id="sliderAfter" class="slider-after preview-image" alt="After">
-            <div class="slider-before">
-                <img id="sliderBefore" class="preview-image" alt="Before">
-            </div>
-            <div class="slider-handle"></div>
         </div>
 
         <div class="button-group" id="buttonGroup">
             <button class="btn btn-primary" id="processBtn">Proses HD</button>
             <button class="btn btn-success" id="downloadBtn" disabled>Download</button>
-            <button class="btn btn-secondary" id="compareBtn" style="display: none;">Bandingkan</button>
             <button class="btn btn-secondary" id="resetBtn">Ulangi</button>
         </div>
     </div>
@@ -310,12 +374,8 @@
         const buttonGroup = document.getElementById('buttonGroup');
         const processBtn = document.getElementById('processBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const compareBtn = document.getElementById('compareBtn');
         const resetBtn = document.getElementById('resetBtn');
         const loading = document.getElementById('loading');
-        const comparisonSlider = document.getElementById('comparisonSlider');
-        const sliderBefore = document.getElementById('sliderBefore');
-        const sliderAfter = document.getElementById('sliderAfter');
 
         let processedImageUrl = null;
 
@@ -324,7 +384,6 @@
         fileInput.addEventListener('change', handleFileSelect);
         processBtn.addEventListener('click', processImage);
         downloadBtn.addEventListener('click', downloadImage);
-        compareBtn.addEventListener('click', toggleComparison);
         resetBtn.addEventListener('click', resetApp);
 
         function handleFileSelect(event) {
@@ -332,31 +391,40 @@
             if (!file) return;
 
             if (!file.type.startsWith('image/')) {
-                alert('Pilih file gambar yang valid!');
+                showError('Pilih file gambar yang valid!');
                 return;
             }
 
             if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file maksimal 10MB!');
+                showError('Ukuran file maksimal 10MB!');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                originalPreview.src = e.target.result;
-                originalPreview.style.display = 'block';
-                originalPlaceholder.style.display = 'none';
+                // Hide upload area dengan animasi
+                uploadArea.style.opacity = '0.5';
+                uploadArea.style.transform = 'scale(0.98)';
                 
-                previewContainer.style.display = 'flex';
-                buttonGroup.style.display = 'flex';
-                
-                resultPreview.style.display = 'none';
-                resultPlaceholder.style.display = 'block';
-                downloadBtn.disabled = true;
-                compareBtn.style.display = 'none';
-                comparisonSlider.style.display = 'none';
-                
-                processedImageUrl = null;
+                setTimeout(() => {
+                    originalPreview.src = e.target.result;
+                    originalPreview.onload = () => {
+                        originalPreview.classList.add('loaded');
+                        originalPlaceholder.style.display = 'none';
+                    };
+                    
+                    previewContainer.style.display = 'flex';
+                    setTimeout(() => previewContainer.classList.add('show'), 50);
+                    
+                    buttonGroup.style.display = 'flex';
+                    setTimeout(() => buttonGroup.classList.add('show'), 100);
+                    
+                    resultPreview.style.display = 'none';
+                    resultPlaceholder.style.display = 'block';
+                    downloadBtn.disabled = true;
+                    
+                    processedImageUrl = null;
+                }, 300);
             };
             reader.readAsDataURL(file);
         }
@@ -365,10 +433,15 @@
             const file = fileInput.files[0];
             if (!file) return;
 
-            processBtn.style.display = 'none'; // Hilangkan tombol proses
+            // Loading effect pada tombol
+            processBtn.classList.add('btn-loading');
+            processBtn.disabled = true;
+            
+            // Show loading dengan animasi
             loading.style.display = 'block';
+            setTimeout(() => loading.classList.add('show'), 50);
+            
             downloadBtn.disabled = true;
-            compareBtn.style.display = 'none';
 
             const formData = new FormData();
             formData.append('image', file);
@@ -390,100 +463,148 @@
                 }
 
                 processedImageUrl = URL.createObjectURL(blob);
-                resultPreview.src = processedImageUrl;
-                resultPreview.style.display = 'block';
-                resultPlaceholder.style.display = 'none';
-                downloadBtn.disabled = false;
-                compareBtn.style.display = 'block';
-
-                // Setup comparison slider
-                sliderBefore.src = originalPreview.src;
-                sliderAfter.src = processedImageUrl;
+                
+                // Hide loading dengan animasi
+                loading.classList.remove('show');
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    
+                    // Show result dengan animasi
+                    resultPreview.src = processedImageUrl;
+                    resultPreview.style.display = 'block';
+                    resultPreview.onload = () => {
+                        resultPreview.classList.add('loaded');
+                        resultPlaceholder.style.display = 'none';
+                    };
+                    
+                    downloadBtn.disabled = false;
+                    
+                    // Hilangkan tombol proses dengan animasi
+                    processBtn.style.opacity = '0';
+                    processBtn.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        processBtn.style.display = 'none';
+                    }, 300);
+                    
+                }, 500);
 
             } catch (error) {
-                alert('Error: ' + error.message);
-                processBtn.style.display = 'block'; // Tampilkan kembali jika error
-            } finally {
-                loading.style.display = 'none';
+                showError('Error: ' + error.message);
+                resetProcessingState();
             }
         }
 
         function downloadImage() {
             if (!processedImageUrl) return;
 
-            const a = document.createElement('a');
-            a.href = processedImageUrl;
-            a.download = 'hd-image-' + Date.now() + '.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function toggleComparison() {
-            if (comparisonSlider.style.display === 'block') {
-                comparisonSlider.style.display = 'none';
-                previewContainer.style.display = 'flex';
-                compareBtn.textContent = 'Bandingkan';
-            } else {
-                comparisonSlider.style.display = 'block';
-                previewContainer.style.display = 'none';
-                compareBtn.textContent = 'Sembunyikan';
-            }
+            // Loading effect pada tombol download
+            const originalText = downloadBtn.textContent;
+            downloadBtn.classList.add('btn-loading');
+            downloadBtn.textContent = '';
+            
+            setTimeout(() => {
+                const a = document.createElement('a');
+                a.href = processedImageUrl;
+                a.download = 'hd-image-' + Date.now() + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Reset tombol download
+                downloadBtn.classList.remove('btn-loading');
+                downloadBtn.textContent = originalText;
+            }, 500);
         }
 
         function resetApp() {
-            fileInput.value = '';
-            previewContainer.style.display = 'none';
-            buttonGroup.style.display = 'none';
-            originalPreview.style.display = 'none';
-            resultPreview.style.display = 'none';
-            originalPlaceholder.style.display = 'block';
-            resultPlaceholder.style.display = 'block';
-            downloadBtn.disabled = true;
-            compareBtn.style.display = 'none';
-            comparisonSlider.style.display = 'none';
-            processBtn.style.display = 'block'; // Tampilkan kembali tombol proses
-            processedImageUrl = null;
+            // Animasi reset
+            previewContainer.classList.remove('show');
+            buttonGroup.classList.remove('show');
+            originalPreview.classList.remove('loaded');
+            resultPreview.classList.remove('loaded');
+            
+            setTimeout(() => {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                buttonGroup.style.display = 'none';
+                originalPreview.style.display = 'none';
+                resultPreview.style.display = 'none';
+                originalPlaceholder.style.display = 'block';
+                resultPlaceholder.style.display = 'block';
+                downloadBtn.disabled = true;
+                
+                // Reset tombol proses
+                processBtn.style.display = 'block';
+                processBtn.style.opacity = '1';
+                processBtn.style.transform = 'scale(1)';
+                processBtn.classList.remove('btn-loading');
+                processBtn.disabled = false;
+                processBtn.textContent = 'Proses HD';
+                
+                // Reset upload area
+                uploadArea.style.opacity = '1';
+                uploadArea.style.transform = 'scale(1)';
+                
+                processedImageUrl = null;
+            }, 500);
         }
 
-        // Initialize comparison slider
-        function initComparisonSlider() {
-            const handle = comparisonSlider.querySelector('.slider-handle');
-            const before = comparisonSlider.querySelector('.slider-before');
-            let isDragging = false;
-
-            handle.addEventListener('mousedown', startDrag);
-            handle.addEventListener('touchstart', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchend', stopDrag);
-
-            function startDrag(e) {
-                e.preventDefault();
-                isDragging = true;
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                
-                const rect = comparisonSlider.getBoundingClientRect();
-                const x = e.clientX || (e.touches && e.touches[0].clientX);
-                if (!x) return;
-                
-                const percent = ((x - rect.left) / rect.width) * 100;
-                const clampedPercent = Math.max(0, Math.min(100, percent));
-                before.style.width = clampedPercent + '%';
-                handle.style.left = clampedPercent + '%';
-            }
-
-            function stopDrag() {
-                isDragging = false;
-            }
+        function resetProcessingState() {
+            processBtn.classList.remove('btn-loading');
+            processBtn.disabled = false;
+            loading.classList.remove('show');
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 500);
         }
 
-        initComparisonSlider();
+        function showError(message) {
+            // Buat elemen error dengan animasi
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-100px);
+                background: #ff6b6b;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                transition: all 0.5s ease;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            // Animasi masuk
+            setTimeout(() => {
+                errorDiv.style.transform = 'translateX(-50%) translateY(0)';
+            }, 100);
+            
+            // Animasi keluar setelah 3 detik
+            setTimeout(() => {
+                errorDiv.style.transform = 'translateX(-50%) translateY(-100px)';
+                setTimeout(() => {
+                    document.body.removeChild(errorDiv);
+                }, 500);
+            }, 3000);
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to container
+            const container = document.querySelector('.container');
+            container.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 15px 40px rgba(0,0,0,0.2)';
+            });
+            
+            container.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+            });
+        });
     </script>
 </body>
 </html>
